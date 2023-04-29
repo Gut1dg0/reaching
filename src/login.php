@@ -2,6 +2,8 @@
 session_start();
 include '../config/config.php';
 
+$member = [];
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $member['email'] = $_POST['email'];
     $member['password'] = $_POST['password'];
@@ -19,9 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $hash = $statement->fetchColumn();
         $result = password_verify($member['password'], $hash);
         if ($result) {
-            header("Location: h.html");
+            header("Location: ../public/h.html");
         } else {
-            header("Location: e.html");
+            header("Location: ../public/e.html");
         }
         } catch (PDOException $e) {
             throw $e;
