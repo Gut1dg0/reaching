@@ -2,38 +2,41 @@
 include '../config/config.php';
 
 $member = [];
-$errors = [
-    'firstname' => '',
-    'lastname' => '',
-    'email' => '',
-    'password' => ''
-];
 
 #Collect member data
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $member['firstname'] = isset($_POST['firstname']) ? $_POST['firstname'] : '';
-    $member['lastname'] = isset($_POST['lastname']) ? $_POST['lastname'] : '';
-    $member['email'] = isset($_POST['email']) ? $_POST['email'] : '';
-    $member['password'] = isset($_POST['password']) ? password_hash($_POST['password'], PASSWORD_DEFAULT) : '';
+    $member['firstname'] = $_POST['firstname'];
+    $member['lastname'] = $_POST['lastname'];
+    $member['email'] = $_POST['email'];
+    $member['password'] = $_POST['password'];
 
-    $errors['firstname'] = mb_strlen($member['firstname']) > 1;
-    $errors['lastname'] = mb_strlen($member['lastname']) > 1;
-    $errors['email'] = filter_var($member['email'], FILTER_VALIDATE_EMAIL) ? true : false;
-    $errors['password'] = mb_strlen($member['password']) > 8;
+    $hashed_password = password_hash($member['password'], PASSWORD_DEFAULT);
 
-    $invalid = implode($errors);
+    $valid['firstname'] = strlen($member['firstname']) > 1;
+    $valid['lastname'] = strlen($member['lastname']) > 1;
+    $valid['email'] = filter_var($member['email'], FILTER_VALIDATE_EMAIL);
+    
+    $password_validation = [
+        'uppercase' => preg_match('@[A-Z]@', $member['password']),
+        'lowercase' => preg_match('@[a-z]@', $member['password']),
+        'number' => preg_match('@[0-9]@', $member['password']),
+        'specialchars' => preg_match('@[^\w]@', $member['password']),
+    ];
+    
+    $valid['password'] = $password_validation['uppercase'] && $password_validation['lowercase']
+    && $password_validation['number'] && $password_validation['specialchars'];
 
     $sql = "INSERT INTO member (name, lastname, email, password)
         VALUES (:name, :lastname, :email, :password);";
     $pdo = new PDO($dsn, $username, $password, $options);
 
-    function register($sql, $pdo, $member) {
+    function register($sql, $pdo, $member, $password) {
         try {
         $statement = $pdo->prepare($sql);
         $statement->bindValue(':name', $member['firstname']);
         $statement->bindValue(':lastname', $member['lastname']);
         $statement->bindValue(':email', $member['email']);
-        $statement->bindValue(':password', $member['password']);
+        $statement->bindValue(':password', $password);
         $statement->execute();
         header("Location: ../public/login-form.html");
         exit;
@@ -42,10 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    if($errors['firstname'] & $errors['lastname'] & 
-    $errors['email'] & $errors['password']) {
-        register($sql, $pdo, $member);
-    } else {
+    if(!$valid['firstname'] || !$valid['lastname'] || !$valid['email'] || !$valid['password']) {
         header("Location: ../public/index.html");
+    } else {
+        register($sql, $pdo, $member, $hashed_password);
     }
 }
