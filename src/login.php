@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $member['email'] = $_POST['email'];
     $member['password'] = $_POST['password'];
 
-    $sql = "SELECT password FROM member
+    $sql = "SELECT password, name FROM member
             WHERE email = :email";
 
     $pdo = new PDO($dsn, $username, $password, $options);
@@ -18,17 +18,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $statement = $pdo->prepare($sql);
         $statement->bindValue(':email', $member['email']);
         $statement->execute();
-        $hash = $statement->fetchColumn();
-        $result = password_verify($member['password'], $hash);
+        $data = $statement->fetch(PDO::FETCH_ASSOC);
+        $result = password_verify($member['password'], $data['password']);
         if ($result) {
-            header("Location: ../public/h.html");
+            header("Location: ../public/home.php");
         } else {
             header("Location: ../public/e.html");
         }
         } catch (PDOException $e) {
             throw $e;
         }
+        return $data;
     }
 
-    login($sql, $pdo, $member);
+    $data = login($sql, $pdo, $member);
+
+    $_SESSION['name'] = $data['name'];
 }
