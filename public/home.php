@@ -9,7 +9,7 @@ session_start();
     <body>
         <nav>
             <ul>
-                <a href="#" target="_blank"><li><?= $_SESSION['name'] ?></li></a>
+                <a href="#"><li><?= $_SESSION['name'] ?></li></a>
                 <a href="logout-page.php"><li>Log out</li></a>
             </ul>
         </nav>

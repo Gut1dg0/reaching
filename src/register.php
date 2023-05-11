@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 include '../config/config.php';
 
 $member = [];
@@ -38,15 +40,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $statement->bindValue(':email', $member['email']);
         $statement->bindValue(':password', $password);
         $statement->execute();
-        header("Location: ../public/login-form.html");
+        header("Location: ../public/login-form.php");
         exit;
         } catch (PDOException $e) {
-            throw $e;
+            if ($e->errorInfo[1] === 1062) {
+                $_SESSION['email_error'] = "An account with that email already exists";
+                header("Location: ../public/register-form.php");
+                exit;
+            } else {
+                throw $e;
+            }
         }
     }
 
     if(!$valid['firstname'] || !$valid['lastname'] || !$valid['email'] || !$valid['password']) {
-        header("Location: ../public/index.html");
+        header("Location: ../public/register-form.php");
     } else {
         register($sql, $pdo, $member, $hashed_password);
     }

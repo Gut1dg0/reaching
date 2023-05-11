@@ -23,7 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($result) {
             header("Location: ../public/home.php");
         } else {
-            header("Location: ../public/e.html");
+            $_SESSION['failed_login'] = "Your email or password is incorrect";
+            header("Location: ../public/login-form.php");
         }
         } catch (PDOException $e) {
             throw $e;

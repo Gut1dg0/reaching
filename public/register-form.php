@@ -1,3 +1,7 @@
+<?php
+session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -11,7 +15,7 @@
     <body>
         <header>
             <hgroup>
-                <h1>Welcome to Reaching</h1>
+                <h1>Welcome to <a href="index.html">Reaching</a></h1>
                 <p>The best solution for WhatsApp business Platform</p>
             </hgroup>
         </header>
@@ -34,5 +38,10 @@
             </p>
             <button type="submit">Register</button>
         </form>
+        <?php if(isset($_SESSION['email_error'])) {
+            echo $_SESSION['email_error'];
+            unset($_SESSION['email_error']);
+        }
+        ?>
     </body>
 </html>
